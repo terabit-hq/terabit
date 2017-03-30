@@ -5,7 +5,7 @@ SetCompressor /SOLID lzma
 
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\$(^Name)"
-!define VERSION 0.3.0
+!define VERSION 1.0.0
 !define COMPANY "Terabit project"
 !define URL http://terabit.etra.kr/
 
@@ -45,13 +45,13 @@ Var StartMenuGroup
 !insertmacro MUI_LANGUAGE English
 
 # Installer attributes
-OutFile terabit-0.3.0-win32-setup.exe
+OutFile terabit-${VERSION}-win32-setup.exe
 InstallDir $PROGRAMFILES\Terabit
 CRCCheck on
 XPStyle on
 BrandingText " "
 ShowInstDetails show
-VIProductVersion 0.3.0.0
+VIProductVersion 1.0.0.0
 VIAddVersionKey ProductName Terabit
 VIAddVersionKey ProductVersion "${VERSION}"
 VIAddVersionKey CompanyName "${COMPANY}"
