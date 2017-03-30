@@ -1,0 +1,2 @@
+debian/bin/terabitd usr/bin
+src/terabitd usr/lib/terabit

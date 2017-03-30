@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Terabit
+Comment=Terabit P2P Cryptocurrency
+Comment[fr]=Terabit, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Terabit, eşten eşe kriptografik sanal para birimi
+Exec=/usr/bin/terabit-qt
+Terminal=false
+Type=Application
+Icon=/usr/share/pixmaps/bitcoin80.xpm
+MimeType=x-scheme-handler/terabit;
+Categories=Office;
