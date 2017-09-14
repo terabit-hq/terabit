@@ -85,13 +85,12 @@ public:
         genesis.nTime    = 1483228801;
         genesis.nBits    = bnProofOfWorkLimit.GetCompact();
         genesis.nNonce   = 1265559;
-
-        hashGenesisBlock = genesis.GetHash();
+		hashGenesisBlock = genesis.GetHash();
 		
         assert(hashGenesisBlock == uint256("0x000009920a565b40c1df78863bb208f22174ecb51f3b63db876019994b130365"));
         assert(genesis.hashMerkleRoot == uint256("0x26005963d67ca28b83895e5ecc59406d8c1dabc91d0c4674de61a5516aba991d"));
 
-        vSeeds.push_back(CDNSSeedData("tera.etra.kr", "dev.etra.kr"));
+        vSeeds.push_back(CDNSSeedData("node1.teracoex.com", "seed.teracoex.com"));
 		
 		// Terabit addresses start with 'X' => 'T'
 		base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 65);
@@ -139,8 +138,8 @@ public:
         pchMessageStart[3] = 0xef;
         bnProofOfWorkLimit = CBigNum(~uint256(0) >> 16);
         vAlertPubKey = ParseHex("0403fdc9b9d85becbf10e24f82aa2e4d950f9a0cbe85c4974632c7ce5a33d84fc232814285bcf22d4fef8bf3b8adfa6dd62d06f4af48f2f5f69acd225c40ade0b8");
-        nDefaultPort = 13008;
-        nRPCPort = 13009;
+        nDefaultPort = 13011;
+        nRPCPort = 13012;
         strDataDir = "testnet";
 
         // Modify the testnet genesis block so the timestamp is valid for a later start.
@@ -183,7 +182,7 @@ public:
         genesis.nBits  = bnProofOfWorkLimit.GetCompact();
         genesis.nNonce = 2;
         hashGenesisBlock = genesis.GetHash();
-        nDefaultPort = 13009;
+        nDefaultPort = 13021;
         strDataDir = "regtest";
 		
         assert(hashGenesisBlock == uint256("0x9f8fc5dc9eb7e356d31e86b639ab0f20567f420987081fb47fec14794b19c95a"));
