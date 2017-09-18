@@ -90,7 +90,13 @@ public:
         assert(hashGenesisBlock == uint256("0x000009920a565b40c1df78863bb208f22174ecb51f3b63db876019994b130365"));
         assert(genesis.hashMerkleRoot == uint256("0x26005963d67ca28b83895e5ecc59406d8c1dabc91d0c4674de61a5516aba991d"));
 
-        vSeeds.push_back(CDNSSeedData("node1.teracoex.com", "seed.teracoex.com"));
+        vSeeds.push_back(CDNSSeedData("seed1", "tera001.bitchk.com",true));
+        vSeeds.push_back(CDNSSeedData("seed2", "tera002.bitchk.com",true));
+        
+        vSeeds.push_back(CDNSSeedData("t1", "node1.teracoex.com",true));
+        vSeeds.push_back(CDNSSeedData("t2", "node2.teracoex.com",true));
+        vSeeds.push_back(CDNSSeedData("t3", "node3.teracoex.com",true));
+        vSeeds.push_back(CDNSSeedData("t4", "node4.teracoex.com",true));
 		
 		// Terabit addresses start with 'X' => 'T'
 		base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 65);
