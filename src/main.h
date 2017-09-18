@@ -66,10 +66,10 @@ inline bool IsProtocolV3(int64_t nTime) { return TestNet() || nTime > 1444028400
 
 
 inline int64_t FutureDriftV2(int64_t nTime) { return nTime + 10 * 60; }
-//10ºÐ
+//10ï¿½ï¿½
 inline int64_t FutureDrift(int64_t nTime, int nHeight) { return  FutureDriftV2(nTime); }
 
-inline unsigned int GetTargetSpacing(int nHeight) { return 64; }
+inline unsigned int GetTargetSpacing(int nHeight) { return 64; }//64
 
 extern CScript COINBASE_FLAGS;
 extern CCriticalSection cs_main;
@@ -139,7 +139,7 @@ bool SendMessages(CNode* pto, bool fSendTrickle);
 void ThreadImport(std::vector<boost::filesystem::path> vImportFiles);
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits);
-unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake);
+unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlock *pblock, bool fProofOfStake);
 int64_t GetProofOfWorkReward(const CBlockIndex * pindexPrev,int64_t nFees);
 int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, int64_t nFees);
 bool IsInitialBlockDownload();
@@ -1168,6 +1168,7 @@ public:
             GetBlockHash().ToString(),
             hashPrev.ToString(),
             hashNext.ToString());
+            
         return str;
     }
 };

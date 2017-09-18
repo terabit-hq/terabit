@@ -238,8 +238,10 @@ Value getblock(const Array& params, bool fHelp)
     std::string strHash = params[0].get_str();
     uint256 hash(strHash);
 
-    if (mapBlockIndex.count(hash) == 0)
+    if (mapBlockIndex.count(hash) == 0){ 
+        DbgMsg("Block not found %s  " , hash.ToString());
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
+    }
 
     CBlock block;
     CBlockIndex* pblockindex = mapBlockIndex[hash];

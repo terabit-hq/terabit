@@ -106,8 +106,9 @@ bool LogAcceptCategory(const char* category);
 /* Send a string to the log output */
 int LogPrintStr(const std::string &str);
 
-#define LogPrintf(...) LogPrint(NULL, __VA_ARGS__)
-
+// #define LogPrintf(...) LogPrint(NULL, __VA_ARGS__)
+#define LogPrintf(msg , args...) LogPrint(NULL,  "[%s:%d]  %s() :: " msg ,  __FILE__,__LINE__,__func__ , ##args)
+#define DbgMsg(msg , args...) LogPrint( NULL,"[%s:%d]  %s() :: " msg "\n" ,  __FILE__,__LINE__,__func__ , ##args)
 /* When we switch to C++11, this can be switched to variadic templates instead
  * of this macro-based construction (see tinyformat.h).
  */

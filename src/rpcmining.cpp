@@ -167,15 +167,20 @@ Value checkkernel(const Array& params, bool fHelp)
     Array inputs = params[0].get_array();
     bool fCreateBlockTemplate = params.size() > 1 ? params[1].get_bool() : false;
 
-    if (vNodes.empty())
-        throw JSONRPCError(-9, "Terabit is not connected!");
+   // if (vNodes.empty())
+   //     throw JSONRPCError(-9, "Terabit is not connected!");
 
     if (IsInitialBlockDownload())
         throw JSONRPCError(-10, "Terabit is downloading blocks....[1]");
 
     COutPoint kernel;
     CBlockIndex* pindexPrev = pindexBest;
-    unsigned int nBits = GetNextTargetRequired(pindexPrev, true);
+
+    int64_t nFees;
+    
+    auto_ptr<CBlock> pblock(CreateNewBlock(*pMiningKey, true, &nFees));
+    
+    unsigned int nBits = GetNextTargetRequired(pindexPrev,pblock.get(),true);
 	
     int64_t nTime = GetAdjustedTime();
     nTime &= ~STAKE_TIMESTAMP_MASK;
@@ -221,8 +226,6 @@ Value checkkernel(const Array& params, bool fHelp)
     if (!fCreateBlockTemplate)
         return result;
 
-    int64_t nFees;
-    auto_ptr<CBlock> pblock(CreateNewBlock(*pMiningKey, true, &nFees));
 
     pblock->nTime = pblock->vtx[0].nTime = nTime;
 
@@ -383,8 +386,8 @@ Value getwork(const Array& params, bool fHelp)
             "  \"target\" : little endian hash target\n"
             "If [data] is specified, tries to solve the block and returns true if it was successful.");
 
-    if (vNodes.empty())
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Terabit is not connected!");
+   // if (vNodes.empty())
+   //     throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Terabit is not connected!");
 
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Terabit is downloading blocks...[2]");

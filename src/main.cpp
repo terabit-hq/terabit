@@ -975,9 +975,9 @@ int64_t GetProofOfWorkReward(const CBlockIndex * pindexPrev, int64_t nFees)
 	if (pindexPrev == NULL){
 		nSubsidy = 5 * COIN;
 	}else if (pindexPrev->nHeight < 100) {
-		nSubsidy = 800000000 * COIN;//8¾ï* 100 = 800 ¾ï
+		nSubsidy = 800000000 * COIN;//8ï¿½ï¿½* 100 = 800 ï¿½ï¿½
 	}else if (pindexPrev->nHeight < 200) {
-		nSubsidy = 100000 * COIN;//1Ãµ¸¸
+		nSubsidy = 100000 * COIN;//1Ãµï¿½ï¿½
 	}
 	else {
 		nSubsidy = 1.6 * COIN;
@@ -1023,7 +1023,7 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfSta
     return pindex;
 }
 
-unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake)
+unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlock *pblock, bool fProofOfStake)
 {
     CBigNum bnTargetLimit = fProofOfStake ? GetProofOfStakeLimit(pindexLast->nHeight) : Params().ProofOfWorkLimit();
     if (pindexLast == NULL)
@@ -1041,15 +1041,51 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     int64_t nTargetSpacing = GetTargetSpacing(pindexLast->nHeight);
     int64_t nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
     
-    if (IsProtocolV3(pindexLast->nTime)) {
-        if (nActualSpacing > nTargetSpacing * 10)
-            nActualSpacing = nTargetSpacing * 10;
-    }
-
-    // ppcoin: target change every block
-    // ppcoin: retarget with exponential moving toward target spacing
+    
+    if (nActualSpacing > nTargetSpacing * 10)
+        nActualSpacing = nTargetSpacing * 10;
+    
     CBigNum bnNew;
     bnNew.SetCompact(pindexPrev->nBits);
+
+    // DbgMsg("span %d  %d , gap: %d " , pindexLast->GetBlockTime() , pblock->GetBlockTime() ,  pblock->GetBlockTime()-pindexLast->GetBlockTime() );
+    
+    if(pindexLast->nHeight>67477){ 
+        int gap =  pblock->GetBlockTime()-pindexLast->GetBlockTime() ;
+        if(gap > nTargetSpacing * 5&& !fProofOfStake ){ // 5time s default target spacing, reset 
+            bnNew = bnTargetLimit;
+            if(fDebug)
+            DbgMsg("too old  reset limit index:%d, pos:%s gap:%s nBit:%08x, %s" ,
+                pindexLast->nHeight,
+                fProofOfStake?"true":"false",
+                gap,
+                bnNew.GetCompact(),
+                bnNew.getuint256().ToString()
+                );
+            return bnNew.GetCompact();
+        }
+        
+        if(gap < nTargetSpacing /3){// too early block. set difficulty too hard..
+            DbgMsg("prev index:%d , %08x, :%08x %s" ,pindexPrev->nHeight,pindexPrev->nBits, bnNew.GetCompact() , bnNew.ToString() );
+            unsigned int ret =pindexLast->nBits /2;
+            bnNew.SetCompact(ret);
+            if(fDebug)
+            DbgMsg("too early index:%d ,pos:%s gap:%d require:%d ,prev:%08x, target:%08x ,%s", 
+                pindexLast->nHeight,
+                fProofOfStake?"true":"false",
+                gap,
+                nTargetSpacing /3,
+                pindexLast->nBits,
+                ret,
+                bnNew.getuint256().ToString()
+            );
+            return ret;
+        }
+    }
+    
+    // ppcoin: target change every block
+    // ppcoin: retarget with exponential moving toward target spacing
+    
     int64_t nInterval = nTargetTimespan / nTargetSpacing;
     bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
     bnNew /= ((nInterval + 1) * nTargetSpacing);
@@ -1116,11 +1152,12 @@ void static InvalidChainFound(CBlockIndex* pindexNew)
 
 void CBlock::UpdateTime(const CBlockIndex* pindexPrev)
 {
+    nBits = GetNextTargetRequired(pindexPrev, this,IsProofOfStake());
     nTime = max(GetBlockTime(), GetAdjustedTime());
 }
 /**
-ÇØ´ç Æ®·£Àè¼ÇÀÌ ÀÌÀüºí·°¿¡¼­ »ç¿ëµÇ¾úÀ¸¸é °ÅÀýÇÑ´Ù.
-false ¸¦ ¸®ÅÏÇØ¾ß Á¤»óÀÌ´Ù.
+ï¿½Ø´ï¿½ Æ®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
+false ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì´ï¿½.
 */
 bool IsConfirmedInNPrevBlocks(const CTxIndex& txindex, const CBlockIndex* pindexFrom, int nMaxDepth, int& nActualDepth)
 {
@@ -1786,11 +1823,12 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
 
     uint256 nBestBlockTrust = pindexBest->nHeight != 0 ? (pindexBest->nChainTrust - pindexBest->pprev->nChainTrust) : pindexBest->nChainTrust;
 
-    LogPrintf("SetBestChain: new best=%s  height=%d  trust=%s  blocktrust=%d  date=%s\n",
+    LogPrintf("SetBestChain: new best=%s  height=%d  trust=%s  blocktrust=%d  date=%s nBit:%d \n",
       hashBestChain.ToString(), nBestHeight,
       CBigNum(nBestChainTrust).ToString(),
       nBestBlockTrust.GetLow64(),
-      DateTimeStrFormat("%x %H:%M:%S", pindexBest->GetBlockTime()));
+      DateTimeStrFormat("%x %H:%M:%S", pindexBest->GetBlockTime()),
+      pindexBest->nBits);
 
     // Check the version of the last 100 blocks to see if we need to upgrade:
     if (!fIsInitialDownload)
@@ -1975,7 +2013,7 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig) c
     if (fCheckPOW && IsProofOfWork() && !CheckProofOfWork(GetPoWHash(), nBits))
         return DoS(50, error("CheckBlock() : proof of work failed"));
 
-	//ÀÔ·ÂµÈ ºí·°ÀÇ ½Ã°£ÀÌ ÇöÀç½Ã°£ + 10ºÐº¸´Ù ¹Ì·¡¿¡ ÀÖ´Ù.
+	//ï¿½Ô·Âµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã°ï¿½ + 10ï¿½Ðºï¿½ï¿½ï¿½ ï¿½Ì·ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½.
 	if (GetBlockTime() > FutureDriftV2(GetAdjustedTime()))
 		return error("CheckBlock() : block timestamp too far in the future");
 
@@ -2069,8 +2107,9 @@ bool CBlock::AcceptBlock()
 	// Check coinstake timestamp
     if (IsProofOfStake() && !CheckCoinStakeTimestamp(nHeight, GetBlockTime(), (int64_t)vtx[1].nTime))
         return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%d nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
-	// Check proof-of-work or proof-of-stake
-    if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake()))
+    // Check proof-of-work or proof-of-stake
+    
+    if (nBits != GetNextTargetRequired(pindexPrev, this,IsProofOfStake()))
         return DoS(100, error("AcceptBlock() : incorrect %s", IsProofOfWork() ? "proof-of-work" : "proof-of-stake"));
 	// Check timestamp against prev
 	if (GetBlockTime() <= pindexPrev->GetPastTimeLimit() || FutureDrift(GetBlockTime(), nHeight) < pindexPrev->GetBlockTime()) {
@@ -2297,8 +2336,6 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
         }
         mapOrphanBlocksByPrev.erase(hashPrev);
     }
-
-    LogPrintf("ProcessBlock: ACCEPTED\n");
 
     return true;
 }

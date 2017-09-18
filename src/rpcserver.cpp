@@ -460,8 +460,7 @@ static void RPCAcceptHandler(boost::shared_ptr< basic_socket_acceptor<Protocol, 
         RPCListen(acceptor, context, fUseSSL);
 
     AcceptedConnectionImpl<ip::tcp>* tcp_conn = dynamic_cast< AcceptedConnectionImpl<ip::tcp>* >(conn);
-	if(fDebug)
-		LogPrintf("incomming... \n");
+    
     // TODO: Actually handle errors
     if (error)
     {
@@ -762,6 +761,7 @@ void ServiceConnection(AcceptedConnection *conn)
                 throw JSONRPCError(RPC_PARSE_ERROR, "Parse error");
 
             string strReply;
+       //     DbgMsg("request:%s" ,strRequest);
 
             // singleton request
             if (valRequest.type() == obj_type) {
@@ -777,7 +777,7 @@ void ServiceConnection(AcceptedConnection *conn)
                 strReply = JSONRPCExecBatch(valRequest.get_array());
             else
                 throw JSONRPCError(RPC_PARSE_ERROR, "Top-level object parse error");
-
+         //   DbgMsg("resposne:%s " ,strReply );
             conn->stream() << HTTPReply(HTTP_OK, strReply, fRun) << std::flush;
         }
         catch (Object& objError)
