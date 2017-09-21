@@ -6,21 +6,21 @@ USE_UPNP:=0
 USE_WALLET:=1
 
 INCLUDEPATHS= \
- -I"/d/blockchain/blk/deps/boost_1_57_0" \
- -I"/d/blockchain/blk/deps/db-4.8.30.NC\build_unix" \
- -I"/d/blockchain/blk/deps/openssl-1.0.2k\include"
+ -I"/d/blockchain/depends/boost_1_57_0" \
+ -I"/d/blockchain/depends/db-4.8.30.NC\build_unix" \
+ -I"/d/blockchain/depends/openssl-1.0.1u\include"
 
 LIBPATHS= \
- -L"/d/blockchain/blk/deps/boost_1_57_0\stage\lib" \
- -L"/d/blockchain/blk/deps/db-4.8.30.NC\build_unix" \
- -L"/d/blockchain/blk/deps/openssl-1.0.2k"
+ -L"/d/blockchain/depends/boost_1_57_0\stage\lib" \
+ -L"/d/blockchain/depends/db-4.8.30.NC\build_unix" \
+ -L"/d/blockchain/depends/openssl-1.0.1u"
 
 LIBS= \
- -l boost_system-mgw49-mt-1_57 \
- -l boost_filesystem-mgw49-mt-1_57 \
- -l boost_program_options-mgw49-mt-1_57 \
- -l boost_thread-mgw49-mt-1_57 \
- -l boost_chrono-mgw49-mt-1_57 \
+ -l boost_system-mgw49-mt-s-1_57 \
+ -l boost_filesystem-mgw49-mt-s-1_57 \
+ -l boost_program_options-mgw49-mt-s-1_57 \
+ -l boost_thread-mgw49-mt-s-1_57 \
+ -l boost_chrono-mgw49-mt-s-1_57 \
  -l db_cxx \
  -l ssl \
  -l crypto
@@ -36,9 +36,9 @@ ifndef USE_UPNP
 	override USE_UPNP = -
 endif
 ifneq (${USE_UPNP}, -)
- INCLUDEPATHS += -I"/d/blockchain/blk/deps/miniupnpc-1.6.20120509"
- INCLUDEPATHS += -I"/d/blockchain/blk/deps"
- LIBPATHS += -L"/d/blockchain/blk/deps/miniupnpc-1.6.20120509"
+ INCLUDEPATHS += -I"/d/blockchain/depends/miniupnpc-1.6.20120509"
+ INCLUDEPATHS += -I"/d/blockchain/depends"
+ LIBPATHS += -L"/d/blockchain/depends/miniupnpc-1.6.20120509"
  LIBS += -l miniupnpc -l iphlpapi
  DEFS += -DMINIUPNP_STATICLIB -DSTATICLIB -DUSE_UPNP=$(USE_UPNP)
 endif
@@ -119,7 +119,7 @@ terabitd.exe: $(OBJS:obj/%=obj/%)
 	g++ $(CFLAGS) $(LDFLAGS) -o $@ $(LIBPATHS) $^ $(LIBS)
 
 clean:
-	-del /Q terabitd
-	-del /Q obj\*
+	-rm -Rf terabitd
+	-rm -Rf obj\*
 
 FORCE:

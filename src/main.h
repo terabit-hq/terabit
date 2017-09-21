@@ -24,6 +24,7 @@ class CNode;
 class CReserveKey;
 class CWallet;
 static const int BLOCK_HEIGHT_INIT = 200;
+static const int BLOCK_HEIGHT_RESET_POW = 10000;//reset pow limit...
 /** min block iterval every block space is 60 second **/
 static const unsigned int MIN_BLOCK_INTERVAL = 60;
 /** The maximum allowed size for a serialized block, in bytes (network rule) */

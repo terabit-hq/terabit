@@ -987,7 +987,7 @@ int64_t GetProofOfWorkReward(const CBlockIndex * pindexPrev, int64_t nFees)
 		LogPrintf("Max Money.... no more reward[pow]\n");
 		nSubsidy = 0;
 	}
-    LogPrintf( "GetProofOfWorkReward() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
+    // LogPrintf( "GetProofOfWorkReward() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
 
     return nSubsidy + nFees;
 }
@@ -1050,21 +1050,21 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlock *
 
     // DbgMsg("span %d  %d , gap: %d " , pindexLast->GetBlockTime() , pblock->GetBlockTime() ,  pblock->GetBlockTime()-pindexLast->GetBlockTime() );
     
-    if(pindexLast->nHeight>67477){ 
-        int gap =  pblock->GetBlockTime()-pindexLast->GetBlockTime() ;
-        if(gap > nTargetSpacing * 5&& !fProofOfStake ){ // 5time s default target spacing, reset 
-            bnNew = bnTargetLimit;
-            if(fDebug)
-            DbgMsg("too old  reset limit index:%d, pos:%s gap:%s nBit:%08x, %s" ,
-                pindexLast->nHeight,
-                fProofOfStake?"true":"false",
-                gap,
-                bnNew.GetCompact(),
-                bnNew.getuint256().ToString()
-                );
-            return bnNew.GetCompact();
-        }
-        
+    
+    int gap =  pblock->GetBlockTime()-pindexLast->GetBlockTime() ;
+    if(gap > nTargetSpacing * 5&& !fProofOfStake ){ // 5time s default target spacing, reset 
+        bnNew = bnTargetLimit;
+        if(fDebug)
+        DbgMsg("too old  reset limit index:%d, pos:%s gap:%s nBit:%08x, %s" ,
+            pindexLast->nHeight,
+            fProofOfStake?"true":"false",
+            gap,
+            bnNew.GetCompact(),
+            bnNew.getuint256().ToString()
+            );
+        return bnNew.GetCompact();
+    }
+    if(pindexLast->nHeight>BLOCK_HEIGHT_RESET_POW){     
         if(gap < nTargetSpacing /3){// too early block. set difficulty too hard..
             DbgMsg("prev index:%d , %08x, :%08x %s" ,pindexPrev->nHeight,pindexPrev->nBits, bnNew.GetCompact() , bnNew.ToString() );
             unsigned int ret =pindexLast->nBits /2;
@@ -1917,6 +1917,10 @@ bool CTransaction::GetCoinAge(CTxDB& txdb, const CBlockIndex* pindexPrev, uint64
 			continue; // only count coins meeting min age requirement
 
         int64_t nValueIn = txPrev.vout[txin.prevout.n].nValue;
+        if(nValueIn> 100000000){
+            LogPrint("coinage", "Too Large reward...");
+            continue;
+        }
         bnCentSecond += CBigNum(nValueIn) * (nTime-txPrev.nTime) / CENT;
 
         LogPrint("coinage", "coin age nValueIn=%d nTimeDiff=%d bnCentSecond=%s  nTime:%d,txPrev.nTime:%d\n", nValueIn, nTime - txPrev.nTime, bnCentSecond.ToString(), nTime,txPrev.nTime);
@@ -2013,12 +2017,14 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig) c
     if (fCheckPOW && IsProofOfWork() && !CheckProofOfWork(GetPoWHash(), nBits))
         return DoS(50, error("CheckBlock() : proof of work failed"));
 
-	//�Էµ� ���� �ð��� ����ð� + 10�к��� �̷��� �ִ�.
-	if (GetBlockTime() > FutureDriftV2(GetAdjustedTime()))
-		return error("CheckBlock() : block timestamp too far in the future");
+
+	if (GetBlockTime() > FutureDriftV2(GetAdjustedTime())){ 
+        DbgMsg("CheckBlock() :  far in the future %d %d"  ,GetBlockTime(),FutureDriftV2(GetAdjustedTime()));
+        return error("CheckBlock() : block timestamp too far in the future %d %d"  ,GetBlockTime(),FutureDriftV2(GetAdjustedTime()));
+    }
 
     // First transaction must be coinbase, the rest must not be
-    if (vtx.empty() || !vtx[0].IsCoinBase())
+    if (vtx.empty() || !vtx[0].IsCoinBase()) 
         return DoS(100, error("CheckBlock() : first tx is not coinbase"));
     for (unsigned int i = 1; i < vtx.size(); i++)
         if (vtx[i].IsCoinBase())
@@ -2115,10 +2121,7 @@ bool CBlock::AcceptBlock()
 	if (GetBlockTime() <= pindexPrev->GetPastTimeLimit() || FutureDrift(GetBlockTime(), nHeight) < pindexPrev->GetBlockTime()) {
 		return error("AcceptBlock() : block's timestamp is too early");
 	}
-	// min block is 60 second
-	//if (GetBlockTime() < pindexPrev->GetBlockTime() + MIN_BLOCK_INTERVAL)
-	//	return error("AcceptBlock() : block's timestamp is too early");
-
+	
     // Check that all transactions are finalized
     BOOST_FOREACH(const CTransaction& tx, vtx)
         if (!IsFinalTx(tx, nHeight, GetBlockTime()))

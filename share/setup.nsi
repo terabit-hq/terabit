@@ -7,7 +7,7 @@ SetCompressor /SOLID lzma
 !define REGKEY "SOFTWARE\$(^Name)"
 !define VERSION 1.1.0.1
 !define COMPANY "Terabit project"
-!define URL http://terabit.etra.kr/
+!define URL http://www.teracoex.com/
 
 # MUI Symbol Definitions
 !define MUI_ICON "..\share\pixmaps\terabit.ico"
@@ -67,12 +67,12 @@ Section -Main SEC0000
     SetOutPath $INSTDIR
     SetOverwrite on
     File ..\release\terabit-qt.exe
-    File /oname=license.txt ..\COPYING
+    #File /oname=license.txt ..\COPYING
     File /oname=readme.txt ..\doc\README_windows.txt
     SetOutPath $INSTDIR\daemon
-    #File ..\src\terabitd.exe
+    File ..\src\terabitd.exe
     SetOutPath $INSTDIR\src
-    File /r /x *.exe /x *.o ..\src\*.*
+    #File /r /x *.exe /x *.o ..\src\*.*
     SetOutPath $INSTDIR
     WriteRegStr HKCU "${REGKEY}\Components" Main 1
 
