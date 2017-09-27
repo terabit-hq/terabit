@@ -52,7 +52,7 @@ static const int64_t MIN_RELAY_TX_FEE = MIN_TX_FEE;
 /** No amount larger than this (in satoshi) is valid */
 
 static const int64_t MAX_MONEY = std::numeric_limits<int64_t>::max();
-
+static const int64_t MAX_STAKE_MONEY = 100000000 * COIN;//100,000,000
 //static const int64_t MAX_MONEY = 92300000000 * COIN;
 inline bool MoneyRange(int64_t nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 /** Threshold for nLockTime: below this value it is interpreted as block number, otherwise as UNIX timestamp. */

@@ -1917,7 +1917,7 @@ bool CTransaction::GetCoinAge(CTxDB& txdb, const CBlockIndex* pindexPrev, uint64
 			continue; // only count coins meeting min age requirement
 
         int64_t nValueIn = txPrev.vout[txin.prevout.n].nValue;
-        if(nValueIn> 100000000){
+        if(nValueIn> MAX_STAKE_MONEY){
             LogPrint("coinage", "Too Large reward...");
             continue;
         }
@@ -2273,8 +2273,10 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     // If we don't already have its previous block, shunt it off to holding area until we get it
     if (!mapBlockIndex.count(pblock->hashPrevBlock))
     {
-        LogPrintf("ProcessBlock: ORPHAN BLOCK %lu, prev=%s\n", (unsigned long)mapOrphanBlocks.size(), pblock->hashPrevBlock.ToString());
-
+        LogPrintf("ProcessBlock: ORPHAN BLOCK %lu, prev=%s peer=%s\n", 
+                (unsigned long)mapOrphanBlocks.size(), 
+                pblock->hashPrevBlock.ToString(),
+                pfrom?pfrom->addr.ToString():"(no from)");
         // Accept orphans as long as there is a node to request its parents from
         if (pfrom) {
             // ppcoin: check proof-of-stake
@@ -3580,7 +3582,9 @@ bool ProcessMessages(CNode* pfrom)
         bool fRet = false;
         try
         {
+            
             fRet = ProcessMessage(pfrom, strCommand, vRecv, msg.nTime);
+            
             boost::this_thread::interruption_point();
         }
         catch (std::ios_base::failure& e)

@@ -1148,9 +1148,15 @@ void CWallet::AvailableCoinsForStaking(vector<COutput>& vCoins, unsigned int nSp
             if (pcoin->GetBlocksToMaturity() > 0)
                 continue;
 
-            for (unsigned int i = 0; i < pcoin->vout.size(); i++)
+            for (unsigned int i = 0; i < pcoin->vout.size(); i++){ 
+                if(pcoin->vout[i].nValue >  MAX_STAKE_MONEY ){
+                    if(fDebug)
+                        DbgMsg("skip max stake... ,%u",pcoin->vout[i].nValue );
+                    continue;
+                }
                 if (!(pcoin->IsSpent(i)) && IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue >= nMinimumInputValue)
                     vCoins.push_back(COutput(pcoin, i, nDepth));
+            }
         }
     }
 }
@@ -1746,8 +1752,10 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
             return error("CreateCoinStake : failed to calculate coin age");
 
         int64_t nReward = GetProofOfStakeReward(pindexPrev, nCoinAge, nFees);
-        if (nReward <= 0)
+        if (nReward <= 0){ 
+            DbgMsg("no reward");
             return false;
+        }
 
         nCredit += nReward;
     }
